@@ -9,8 +9,7 @@ import org.mockito.Mockito;
 
 import java.util.UUID;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 class OrderCreatedHandlerTest {
 
@@ -23,8 +22,17 @@ class OrderCreatedHandlerTest {
     }
 
     @Test
-    void listen() {
+    void listen_Success() throws Exception {
         OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(UUID.randomUUID(), UUID.randomUUID().toString());
+
+        handler.listen(testEvent);
+        verify(dispatchServiceMock, times(1)).process(testEvent);
+    }
+
+    @Test
+    void listen_ServiceThrowsException() throws Exception {
+        OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(UUID.randomUUID(), UUID.randomUUID().toString());
+        doThrow(new RuntimeException("Service failure")).when(dispatchServiceMock).process(testEvent);
 
         handler.listen(testEvent);
         verify(dispatchServiceMock, times(1)).process(testEvent);
