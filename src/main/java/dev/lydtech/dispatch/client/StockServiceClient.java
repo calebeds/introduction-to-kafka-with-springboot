@@ -3,6 +3,7 @@ package dev.lydtech.dispatch.client;
 import dev.lydtech.dispatch.exception.RetryableException;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
@@ -17,25 +18,23 @@ public class StockServiceClient {
     private final RestTemplate restTemplate;
     private final String stockServiceEndpoint;
 
-    public StockServiceClient(RestTemplate restTemplate, @Value("${dispatch.stockServiceEndpoint}") String stockServiceEndpoint) {
+    public StockServiceClient(@Autowired RestTemplate restTemplate, @Value("${dispatch.stockServiceEndpoint}") String stockServiceEndpoint) {
         this.restTemplate = restTemplate;
         this.stockServiceEndpoint = stockServiceEndpoint;
     }
 
     /**
-     * The stock service return true if item is available, false otherwise.
+     * The stock service returns true if item is available, false otherwise.
      */
     public String checkAvailability(String item) {
         try {
-            ResponseEntity<String> response = restTemplate.getForEntity(stockServiceEndpoint + "?item=" + item, String.class);
-
-            if(response.getStatusCodeValue() != 200) {
+            ResponseEntity<String> response = restTemplate.getForEntity(stockServiceEndpoint+"?item="+item, String.class);
+            if (response.getStatusCodeValue() != 200) {
                 throw new RuntimeException("error " + response.getStatusCodeValue());
             }
-
             return response.getBody();
         } catch (HttpServerErrorException | ResourceAccessException e) {
-            log.warn("Failure calling external services", e);
+            log.warn("Failure calling external service", e);
             throw new RetryableException(e);
         } catch (Exception e) {
             log.error("Exception thrown: " + e.getClass().getName(), e);

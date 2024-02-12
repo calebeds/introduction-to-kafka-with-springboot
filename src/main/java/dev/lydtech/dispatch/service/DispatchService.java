@@ -25,6 +25,7 @@ public class DispatchService {
     private final StockServiceClient stockServiceClient;
 
     public void process(String key, OrderCreated orderCreated) throws Exception {
+
         String available = stockServiceClient.checkAvailability(orderCreated.getItem());
 
         if(Boolean.valueOf(available)) {
@@ -46,9 +47,9 @@ public class DispatchService {
                     .build();
             kafkaTemplate.send(DISPATCH_TRACKING_TOPIC, key, dispatchCompleted).get();
 
-            log.info("Sent messages: key: " + key + " - orderId " +  orderCreated.getOrderId() + " - processById: " + APPLICATION_ID);
+            log.info("Sent messages: key: " + key + " - orderId: " + orderCreated.getOrderId() + " - processedById: " + APPLICATION_ID);
         } else {
-            log.info("Item " + orderCreated.getItem() + " is unaivalable.");
+            log.info("Item " + orderCreated.getItem() + " is unavailable.");
         }
 
     }

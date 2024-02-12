@@ -32,11 +32,11 @@ public class OrderCreatedHandler {
         log.info("Received message: partition: " + partition + " - key: " + key + " -  payload: " + payload);
         try {
             dispatchService.process(key, payload);
-        } catch (RetryableException e) {
-            log.warn("Retryable exception: ", e.getMessage());
+        }  catch (RetryableException e) {
+            log.warn("Retryable exception: " + e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("NotRetryable exception: ", e.getMessage());
+            log.error("NotRetryable exception: " + e.getMessage());
             throw new NotRetryableException(e);
         }
     }
