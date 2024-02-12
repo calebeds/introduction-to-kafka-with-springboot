@@ -1,5 +1,6 @@
 package dev.lydtech.dispatch.handler;
 
+import dev.lydtech.dispatch.exception.NotRetryableException;
 import dev.lydtech.dispatch.message.OrderCreated;
 import dev.lydtech.dispatch.service.DispatchService;
 import dev.lydtech.dispatch.util.TestEventData;
@@ -9,6 +10,9 @@ import org.mockito.Mockito;
 
 import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class OrderCreatedHandlerTest {
@@ -37,7 +41,8 @@ class OrderCreatedHandlerTest {
         OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(UUID.randomUUID(), UUID.randomUUID().toString());
         doThrow(new RuntimeException("Service failure")).when(dispatchServiceMock).process(key, testEvent);
 
-        handler.listen(0, key, testEvent);
+        Exception exception = assertThrows(NotRetryableException.class, () -> handler.listen(0, key, testEvent));
+        assertThat(exception.getMessage(), equalTo("java.lang.RuntimeException: Service failure"));
         verify(dispatchServiceMock, times(1)).process(key, testEvent);
     }
 }
